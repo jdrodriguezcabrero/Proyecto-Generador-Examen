@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang=es>
+
+<head>
+    <meta charset=utf-8>
+    <title>Generador de Exámenes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="Programa para generar exámenes con preguntas de respuesta múltiple con valores variables, para imprimir y para Moodle">
+    <meta name="keywords" content="exámen, Moodle, aleatorio">
+    <meta name="author" content="Javier F. Panadero">
+    <!-- Favicon simple usando emoji -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+    <!-- Carga Pyodide para ejecutar Python en el navegador -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js"></script>
+    <!-- Framework CSS Pico para estilizar la aplicación -->
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+    <style>
+        /* Estilos personalizados para la aplicación */
+        .center {
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .question-types-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .question-type {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: #f9f9f9;
+        }
+
+        .step {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e0e0e0;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            line-height: 2rem;
+            text-align: center;
+            background-color: #1095c1;
+            color: white;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .nav-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-step {
+            flex: 1;
+            padding: 0.5rem;
+            text-align: center;
+            background-color: #f0f0f0;
+            border-right: 1px solid white;
+        }
+
+        .nav-step.active {
+            background-color: #1095c1;
+            color: white;
+        }
+
+        button.outline {
+            border: 1px solid #1095c1;
+            background-color: transparent;
+            color: #1095c1;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+
+        .penalizacion-config {
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            border-left: 3px solid #1095c1;
+            background-color: #f0f8ff;
+            margin-bottom: 1rem;
+        }
+
+        .penalizacion-config small {
+            display: block;
+            margin-top: 0.25rem;
+            color: #666;
+        }
+
+        .penalizacion-config input[type="number"] {
+            max-width: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <header>
+            <nav>
+                <!-- Barra de navegación superior -->
+                <ul>
+                    <li><strong>📝 Generador de Exámenes</strong></li>
+                </ul>
+                <ul>
+                    <li><a href="#instrucciones-de-uso">Instrucciones</a></li>
+                </ul>
+            </nav>
+        </header>
+        <article>
+            <!-- Indicador de carga inicial -->
+            <p id="status" aria-busy="true" class="center">Cargando...</p>
+            <div id="error-message" class="center hidden" style="color: red; margin-top: 1rem;">
+                <p>Ha ocurrido un error al cargar los scripts. Por favor, intente recargar la página.</p>
+                <button onclick="location.reload()">Recargar página</button>
+            </div>
+
+            <!-- Indicador de pasos del proceso -->
+            <div class="nav-indicator">
+                <div class="nav-step active" id="step1-nav">1. Selección de tipos</div>
+                <div class="nav-step" id="step2-nav">2. Caracterización</div>
+                <div class="nav-step" id="step3-nav">3. Archivo de entrada</div>
+            </div>
+
+            <!-- Paso 1: Selección de tipos de preguntas -->
+            <div id="step1" class="step">
+                <h3><span class="step-number">1</span>Selección de tipos de preguntas</h3>
+                <p>Seleccione los tipos de preguntas que desea incluir en su examen y la cantidad de cada tipo:</p>
+
+                <div class="question-types-container">
+                    <!-- Configuración de preguntas multirespuesta -->
+                    <div class="question-type">
+                        <label for="multirespuesta">Preguntas de opción múltiple:</label>
+                        <input type="number" id="multirespuesta" name="multirespuesta" min="0" value="5">
+                    </div>
+
+                    <!-- Configuración de preguntas verdadero/falso -->
+                    <div class="question-type">
+                        <label for="verdadero_falso">Preguntas de verdadero/falso:</label>
+                        <input type="number" id="verdadero_falso" name="verdadero_falso" min="0" value="0">
+                    </div>
+                </div>
+                <div class="navigation">
+                    <div></div>
+                    <button id="btn-to-step2">Siguiente</button>
+                </div>
+            </div>
+
+            <!-- Paso 2: Configuración detallada de las preguntas -->
+            <div id="step2" class="step hidden">
+                <h3><span class="step-number">2</span>Caracterización del examen</h3>
+                <!-- Configuración detallada de preguntas multirespuesta -->
+                <div id="multirespuesta-config" class="question-type hidden">
+                    <h4>Configuración para preguntas de opción múltiple</h4>
+                    <label for="opciones_multirespuesta">Número de opciones por pregunta:</label>
+                    <input type="number" id="opciones_multirespuesta" name="opciones_multirespuesta" min="2" value="4">
+
+                    <fieldset>
+                        <legend>¿Penalizan las respuestas erróneas?</legend>
+                        <label><input type="radio" name="penalizacion_multi" value="si" checked
+                                onclick="togglePenalizacionConfig('multi')"> Sí</label>
+                        <label><input type="radio" name="penalizacion_multi" value="no"
+                                onclick="togglePenalizacionConfig('multi')"> No</label>
+                    </fieldset>
+
+                    <!-- Configuración de penalización para multirespuesta -->
+                    <div id="penalizacion_multi_config" class="penalizacion-config">
+                        <label for="valor_penalizacion_multi">Valor de la penalización (porcentaje de la
+                            puntuación):</label>
+                        <input type="number" id="valor_penalizacion_multi" name="valor_penalizacion_multi" min="0"
+                            max="100" step="1" value="25">
+                        <small>Porcentaje de la puntuación total que se resta por cada respuesta incorrecta.</small>
+                    </div>
+
+                    <label for="puntos_multi">Puntos por respuesta correcta:</label>
+                    <input type="number" id="puntos_multi" name="puntos_multi" min="0.1" step="0.1" value="1">
+                </div>
+
+                <!-- Configuración detallada de preguntas verdadero/falso -->
+                <div id="verdadero_falso-config" class="question-type hidden">
+                    <h4>Configuración para preguntas de verdadero/falso</h4>
+                    <fieldset>
+                        <legend>¿Penalizan las respuestas erróneas?</legend>
+                        <label><input type="radio" name="penalizacion_vf" value="si" checked
+                                onclick="togglePenalizacionConfig('vf')"> Sí</label>
+                        <label><input type="radio" name="penalizacion_vf" value="no"
+                                onclick="togglePenalizacionConfig('vf')"> No</label>
+                    </fieldset>
+
+                    <!-- Configuración de penalización para verdadero/falso -->
+                    <div id="penalizacion_vf_config" class="penalizacion-config">
+                        <label for="valor_penalizacion_vf">Valor de la penalización (porcentaje de la
+                            puntuación):</label>
+                        <input type="number" id="valor_penalizacion_vf" name="valor_penalizacion_vf" min="0" max="100"
+                            step="1" value="50">
+                        <small>Porcentaje de la puntuación total que se resta por cada respuesta incorrecta.</small>
+                    </div>
+
+                    <label for="puntos_vf">Puntos por respuesta correcta:</label>
+                    <input type="number" id="puntos_vf" name="puntos_vf" min="0.1" step="0.1" value="1">
+                </div>
+
+                <div class="navigation">
+                    <button id="btn-to-step1" class="outline">Anterior</button>
+                    <button id="btn-to-step3">Siguiente</button>
+                </div>
+            </div>
+
+            <!-- Paso 3: Carga de archivo y formato de salida -->
+            <div id="step3" class="step hidden">
+                <h3><span class="step-number">3</span>Archivo de entrada y formato de salida</h3>
+                <p>Suba el archivo de texto con el contenido de su examen y seleccione el formato de salida:</p>
+
+                <form id="exam-form" class="grid">
+                    <!-- Selector de archivo de entrada -->
+                    <div>
+                        <label for="entrada">Examen de entrada:</label>
+                        <input id="entrada" name="entrada" type="file" accept=".txt" required>
+                        <small>Asegúrese de que el archivo .txt contiene las preguntas separadas por líneas en blanco y
+                            las respuestas correctas marcadas con $$$.</small>
+                    </div>
+
+                    <!-- Selección del formato de salida -->
+                    <div>
+                        <fieldset>
+                            <legend>Formato de salida:</legend>
+                            <div>
+                                <input type="radio" id="papel" name="script" value="papel.py" checked>
+                                <label for="papel">Papel (.txt)</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="moodle" name="script" value="moodle.py">
+                                <label for="moodle">Moodle (.xml)</label>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <!-- Botones de navegación y generación -->
+                    <div>
+                        <p></p>
+                        <div class="navigation">
+                            <button id="btn-to-step2-from-3" class="outline">Anterior</button>
+                            <button type="submit">Generar examen</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </article>
+        <!-- Sección de instrucciones -->
+        <h2 id="instrucciones-de-uso">Instrucciones de uso</h2>
+        <ol type="1">
+            <li><strong>Seleccione los tipos de preguntas</strong> que desea incluir en su examen y la cantidad de cada
+                tipo.</li>
+            <li><strong>Configure las características</strong> de cada tipo de pregunta seleccionado (opciones,
+                puntuación, etc.)</li>
+            <li><strong>Prepare el archivo de entrada</strong> con todas sus preguntas separadas por líneas en blanco.
+                La respuesta correcta debe estar marcada con "$$" al inicio.</li>
+            <li><strong>Suba el archivo</strong> y seleccione el formato de salida deseado (Papel o Moodle).</li>
+            <li><strong>Descargue</strong> el examen generado.</li>
+        </ol>
+
+        <!-- Ejemplos de formato de entrada -->
+        <h4 id="ejemplo-de-exámen-de-entrada">Ejemplos de formato para diferentes tipos de preguntas</h4>
+
+        <!-- Ejemplo de cabecera con variables -->
+        <h5>Cabecera de variables (opcional)</h5>
+        <pre><code>entero,x1,20,25
+real,x2,0.3,0.4
+lista,x3,2,4,6,8
+@@@@</code></pre>
+
+        <!-- Ejemplo de pregunta multirespuesta simple -->
+        <h5>Preguntas de opción múltiple</h5>
+        <pre><code>¿Cuál es el cociente entre estos dos números @@ x1 @@, @@ x3 @@ ?
+$Dividirlos y da como resultado: @@ x1/x3 @@
+Restarlos y da como resultado: @@ x1-x3 @@
+Ninguna de las anteriores</code></pre>
+
+        <!-- Ejemplo de pregunta multirespuesta con enunciado multilínea -->
+        <h5>Preguntas de opción múltiple con enunciado multilínea</h5>
+        <pre><code>¿Estás de acuerdo con estas afirmaciones?
+- El doble de @@ x2 @@ es @@ x2*2 @@
+- El triple de @@ x2 @@ es @@ x2*3 @@ 
++++p
+$Con las dos
+Con ninguna
+Con la primera sí, con la segunda no, sería @@ x2*4 @@
+Ninguna de las anteriores</code></pre>
+
+        <!-- Ejemplo de pregunta verdadero/falso -->
+        <h5>Preguntas de verdadero/falso</h5>
+        <pre><code>La suma de @@ x1 @@ más @@ x3 @@ es mayor que 30.
+$Verdadero
+Falso</code></pre>
+       
+    </main>
+
+    <!-- Script principal de la aplicación -->
+    <script src="app.js"></script>
+    <!-- Script para mostrar error si la carga tarda demasiado -->
+    <script>
+        setTimeout(function () {
+            const statusEl = document.getElementById('status');
+            const errorMessageEl = document.getElementById('error-message');
+
+            if (!statusEl.hidden) {
+                errorMessageEl.classList.remove('hidden');
+            }
+        }, 10000);
+    </script>
+</body>
+
+</html>

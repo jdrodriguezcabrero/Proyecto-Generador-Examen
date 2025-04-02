@@ -1,0 +1,245 @@
+entero,x1,20,50
+entero,x2,2,8
+real,x3,0.5,5.5
+lista,x4,2,3,5,7
+@@@@
+
+¿Cuál de los siguientes lenguajes de programación es más adecuado para el desarrollo de aplicaciones móviles nativas para iOS?
+$$$Swift
+Java
+C#
+Python
+Ruby
+Perl
+
+¿Cuál de los siguientes es un sistema operativo de código abierto?
+$$$Linux
+Windows
+macOS
+iOS
+MS-DOS
+Windows Phone
+
+¿Qué estructura de datos utiliza el principio LIFO (Last In, First Out)?
+$$$Pila
+Cola
+Lista enlazada
+Árbol binario
+Tabla hash
+Grafo
+
+¿Qué protocolo se utiliza principalmente para transferir páginas web?
+$$$HTTP
+FTP
+SMTP
+TCP/IP
+UDP
+SSH
+
+¿Cuál de los siguientes elementos NO es un gas noble?
+$$$Cloro
+Helio
+Neón
+Argón
+Kriptón
+Xenón
+
+Si tenemos una función que resuelve un problema de tamaño n dividiéndolo en 2 subproblemas de tamaño n/2, ¿cuál sería su complejidad según el teorema maestro?
+$$$O(n log n)
+O(n)
+O(n²)
+O(log n)
+O(2ⁿ)
+O(1)
+
+¿Cuál de las siguientes obras NO fue escrita por William Shakespeare?
+$$$Don Quijote
+Hamlet
+Romeo y Julieta
+Macbeth
+Otelo
+El sueño de una noche de verano
+
+¿Cuál es el principio fundamental de la programación orientada a objetos que permite que una clase adquiera propiedades de otra?
+$$$Herencia
+Encapsulamiento
+Polimorfismo
+Abstracción
+Modularidad
+Cohesión
+
+¿Cuál de los siguientes países NO pertenece a la Unión Europea?
+$$$Suiza
+España
+Francia
+Italia
+Alemania
+Portugal
+
+¿Qué estructura de datos es más eficiente para operaciones frecuentes de búsqueda cuando los datos están ordenados?
+$$$Árbol binario de búsqueda
+Array
+Lista enlazada
+Cola
+Pila
+Tabla hash no ordenada
+
+¿Cuál de los siguientes componentes NO forma parte de la estructura básica de un ordenador?
+$$$Impresora
+CPU
+Memoria RAM
+Disco duro
+Placa base
+Fuente de alimentación
+
+¿Qué algoritmo de ordenación tiene una complejidad de O(n log n) en el caso promedio?
+$$$Quicksort
+Bubble sort
+Selection sort
+Insertion sort
+Bogo sort
+Cocktail sort
+
+¿Cuál es el planeta más grande del Sistema Solar?
+$$$Júpiter
+Mercurio
+Venus
+Tierra
+Marte
+Saturno
+
+¿Qué patrón de diseño se utiliza para crear una única instancia de una clase y proporcionar un punto de acceso global a ella?
+$$$Singleton
+Factory
+Observer
+Adapter
+Decorator
+Strategy
+
+¿Quién pintó "La noche estrellada"?
+$$$Vincent van Gogh
+Pablo Picasso
+Leonardo da Vinci
+Salvador Dalí
+Claude Monet
+Diego Velázquez
+
+¿Cuál de los siguientes no es un tipo primitivo en la mayoría de lenguajes de programación?
+$$$Array
+Integer
+Float
+Boolean
+Char
+Double
+
+¿Cuál de los siguientes animales es un mamífero marino?
+$$$Delfín
+Tiburón
+Pulpo
+Tortuga marina
+Langosta
+Atún
+
+¿Qué principio establece que una clase debe tener una sola razón para cambiar?
+$$$Principio de responsabilidad única
+Principio de Liskov
+Principio de inversión de dependencias
+Principio abierto/cerrado
+Principio de segregación de interfaces
+Principio de Demeter
+
+¿Qué ciudad albergó los Juegos Olímpicos de 1992?
+$$$Barcelona
+París
+Londres
+Atenas
+Tokio
+Río de Janeiro
+
+¿Quién es el autor de "Cien años de soledad"?
+$$$Gabriel García Márquez
+Miguel de Cervantes
+Jorge Luis Borges
+Julio Cortázar
+Mario Vargas Llosa
+Pablo Neruda
+
+La programación orientada a objetos es un paradigma fundamental en el desarrollo de software moderno.
+$$$Verdadero
+Falso
+
+Los protocolos HTTP y HTTPS utilizan por defecto puertos diferentes en los servidores web.
+$$$Verdadero
+Falso
+
+Un algoritmo de ordenación estable mantiene el orden relativo de los elementos con claves iguales.
+$$$Verdadero
+Falso
+
+El patrón MVC separa la lógica de negocio de la interfaz de usuario.
+$$$Verdadero
+Falso
+
+Una base de datos NoSQL siempre ofrece mejores tiempos de respuesta que una base de datos relacional.
+$$$Falso
+Verdadero
+
+La herencia múltiple está disponible en todos los lenguajes orientados a objetos.
+$$$Falso
+Verdadero
+
+El principio de inversión de dependencias sugiere que los módulos de alto nivel no deben depender de módulos de bajo nivel.
+$$$Verdadero
+Falso
+
+Las clases abstractas pueden ser instanciadas directamente.
+$$$Falso
+Verdadero
+
+La complejidad temporal de un algoritmo O(1) significa que es independiente del tamaño de la entrada.
+$$$Verdadero
+Falso
+
+El valor de x1 es mayor que el doble de x2.
+$$$Verdadero
+Falso
+
+Todos los mamíferos son vivíparos.
+$$$Falso
+Verdadero
+
+La Segunda Guerra Mundial comenzó en 1939.
+$$$Verdadero
+Falso
+
+El agua hierve a 100 grados Fahrenheit.
+$$$Falso
+Verdadero
+
+La Mona Lisa fue pintada por Leonardo da Vinci.
+$$$Verdadero
+Falso
+
+La mitosis es el proceso de división celular que produce células sexuales.
+$$$Falso
+Verdadero
+
+El oxígeno es el elemento más abundante en la corteza terrestre.
+$$$Falso
+Verdadero
+
+El corazón humano tiene cuatro cámaras.
+$$$Verdadero
+Falso
+
+La luz viaja más rápido que el sonido.
+$$$Verdadero
+Falso
+
+Mercurio es el planeta más cercano al Sol.
+$$$Verdadero
+Falso
+
+En un sistema de base de datos relacional, las llaves primarias pueden tener valores nulos.
+$$$Falso
+Verdadero
