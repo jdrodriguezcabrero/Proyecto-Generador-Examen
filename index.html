@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang=es>
+
+<head>
+    <meta charset=utf-8>
+    <title>Generador de Exámenes Avanzado</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="Programa para generar exámenes con diversos tipos de preguntas, para imprimir y para Moodle">
+    <meta name="keywords" content="exámen, Moodle, aleatorio, multirespuesta, verdadero/falso">
+    <meta name="author" content="Javier F. Panadero">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+
+    <style>
+        .center {
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .question-types-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .question-type {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: #f9f9f9;
+        }
+
+        .step {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e0e0e0;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            line-height: 2rem;
+            text-align: center;
+            background-color: #1095c1;
+            color: white;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .nav-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-step {
+            flex: 1;
+            padding: 0.5rem;
+            text-align: center;
+            background-color: #f0f0f0;
+            border-right: 1px solid white;
+        }
+
+        .nav-step.active {
+            background-color: #1095c1;
+            color: white;
+        }
+
+        button.outline {
+            border: 1px solid #1095c1;
+            background-color: transparent;
+            color: #1095c1;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+
+        .penalizacion-config {
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            border-left: 3px solid #1095c1;
+            background-color: #f0f8ff;
+            margin-bottom: 1rem;
+        }
+
+        .penalizacion-config small {
+            display: block;
+            margin-top: 0.25rem;
+            color: #666;
+        }
+
+        .penalizacion-config input[type="number"] {
+            max-width: 100px;
+        }
+
+        #prompt-output {
+            padding: 1rem;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .copy-button {
+            margin-top: 0.5rem;
+            background-color: #1095c1;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .copy-button:hover {
+            background-color: #0d7ea5;
+        }
+
+        .file-info {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .panel-tabs {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+
+        .panel-tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .panel-tab.active {
+            border-bottom: 2px solid #1095c1;
+            color: #1095c1;
+            font-weight: bold;
+        }
+
+        .panel-content {
+            display: none;
+        }
+
+        .panel-content.active {
+            display: block;
+        }
+
+        .opciones-modo {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            border-left: 3px solid #1095c1;
+        }
+
+        .panel-tab {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .panel-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #1095c1;
+        }
+
+        /* Mejora visual para las opciones avanzadas */
+        #opciones-avanzadas-panel fieldset {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #opciones-avanzadas-panel legend {
+            font-weight: bold;
+            padding: 0 0.5rem;
+        }
+
+        #opciones-avanzadas-panel small {
+            display: block;
+            margin-top: 0.25rem;
+            color: #666;
+        }
+
+        /* Resaltar inputs numéricos */
+        #opciones-avanzadas-panel input[type="number"] {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 0.5rem;
+        }
+
+        #opciones-avanzadas-panel input[type="number"]:focus {
+            border-color: #1095c1;
+            box-shadow: 0 0 0 2px rgba(16, 149, 193, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <header>
+            <nav>
+                <ul>
+                    <li><strong>📝 Generador de Exámenes Avanzado</strong></li>
+                </ul>
+                <ul>
+                    <li><a href="#instrucciones-de-uso">Instrucciones</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <article>
+            <p id="status" aria-busy="true" class="center">Cargando...</p>
+            <div id="error-message" class="center hidden" style="color: red; margin-top: 1rem;">
+                <p>Ha ocurrido un error al cargar los scripts. Por favor, intente recargar la página.</p>
+                <button onclick="location.reload()">Recargar página</button>
+            </div>
+
+            <!-- Indicador de navegación -->
+            <div class="nav-indicator">
+                <div class="nav-step active" id="step1-nav">1. Selección de tipos</div>
+                <div class="nav-step" id="step2-nav">2. Caracterización</div>
+                <div class="nav-step" id="step3-nav">3. Generación con IA</div>
+                <div class="nav-step" id="step4-nav">4. Archivo de entrada</div>
+            </div>
+
+            <!-- Paso 1: Selección de tipos de preguntas -->
+            <div id="step1" class="step">
+                <h3><span class="step-number">1</span>Selección de tipos de preguntas</h3>
+                <p>Seleccione los tipos de preguntas que desea incluir en su examen y la cantidad de cada tipo:</p>
+
+                <div class="question-types-container">
+                    <div class="question-type">
+                        <label for="multirespuesta">Preguntas de opción múltiple:</label>
+                        <input type="number" id="multirespuesta" name="multirespuesta" min="0" value="5">
+                    </div>
+
+                    <div class="question-type">
+                        <label for="verdadero_falso">Preguntas de verdadero/falso:</label>
+                        <input type="number" id="verdadero_falso" name="verdadero_falso" min="0" value="0">
+                    </div>
+
+                    <div class="question-type">
+                        <label for="respuesta_corta">Preguntas de respuesta corta:</label>
+                        <input type="number" id="respuesta_corta" name="respuesta_corta" min="0" value="0">
+                    </div>
+
+                    <div class="question-type">
+                        <label for="rellenar_espacios">Preguntas de rellenar espacios:</label>
+                        <input type="number" id="rellenar_espacios" name="rellenar_espacios" min="0" value="0">
+                    </div>
+                </div>
+
+                <div class="navigation">
+                    <div></div>
+                    <button id="btn-to-step2">Siguiente</button>
+                </div>
+            </div>
+
+            <!-- Paso 2: Caracterización del examen -->
+            <div id="step2" class="step hidden">
+                <h3><span class="step-number">2</span>Caracterización del examen</h3>
+                <!-- Modificación para la configuración de multirespuesta -->
+                <div id="multirespuesta-config" class="question-type hidden">
+                    <h4>Configuración para preguntas de opción múltiple</h4>
+                    <label for="opciones_multirespuesta">Número de opciones por pregunta:</label>
+                    <input type="number" id="opciones_multirespuesta" name="opciones_multirespuesta" min="2" value="4">
+
+                    <fieldset>
+                        <legend>¿Penalizan las respuestas erróneas?</legend>
+                        <label><input type="radio" name="penalizacion_multi" value="si" checked> Sí</label>
+                        <label><input type="radio" name="penalizacion_multi" value="no"> No</label>
+                    </fieldset>
+
+                    <div id="penalizacion_multi_config" class="penalizacion-config">
+                        <label for="valor_penalizacion_multi">Valor de la penalización (porcentaje de la
+                            puntuación):</label>
+                        <input type="number" id="valor_penalizacion_multi" name="valor_penalizacion_multi" min="0"
+                            max="100" step="1" value="25">
+                        <small>Porcentaje de la puntuación total que se resta por cada respuesta incorrecta.</small>
+                    </div>
+
+                    <label for="puntos_multi">Puntos por respuesta correcta:</label>
+                    <input type="number" id="puntos_multi" name="puntos_multi" min="0.1" step="0.1" value="1">
+                </div>
+
+                <div id="verdadero_falso-config" class="question-type hidden">
+                    <h4>Configuración para preguntas de verdadero/falso</h4>
+                    <fieldset>
+                        <legend>¿Penalizan las respuestas erróneas?</legend>
+                        <label><input type="radio" name="penalizacion_vf" value="si" checked> Sí</label>
+                        <label><input type="radio" name="penalizacion_vf" value="no"> No</label>
+                    </fieldset>
+
+                    <div id="penalizacion_vf_config" class="penalizacion-config">
+                        <label for="valor_penalizacion_vf">Valor de la penalización (porcentaje de la
+                            puntuación):</label>
+                        <input type="number" id="valor_penalizacion_vf" name="valor_penalizacion_vf" min="0" max="100"
+                            step="1" value="50">
+                        <small>Porcentaje de la puntuación total que se resta por cada respuesta incorrecta.</small>
+                    </div>
+
+                    <label for="puntos_vf">Puntos por respuesta correcta:</label>
+                    <input type="number" id="puntos_vf" name="puntos_vf" min="0.1" step="0.1" value="1">
+                </div>
+
+                <div id="respuesta_corta-config" class="question-type hidden">
+                    <h4>Configuración para preguntas de respuesta corta</h4>
+                    <label for="puntos_corta">Puntos por respuesta correcta:</label>
+                    <input type="number" id="puntos_corta" name="puntos_corta" min="0.1" step="0.1" value="1">
+
+                    <fieldset>
+                        <legend>¿Distinguir mayúsculas y minúsculas?</legend>
+                        <label><input type="radio" name="case_sensitive" value="si"> Sí</label>
+                        <label><input type="radio" name="case_sensitive" value="no" checked> No</label>
+                    </fieldset>
+                </div>
+
+                <div id="rellenar_espacios-config" class="question-type hidden">
+                    <h4>Configuración para preguntas de rellenar espacios</h4>
+                    <label for="puntos_rellenar">Puntos por respuesta correcta:</label>
+                    <input type="number" id="puntos_rellenar" name="puntos_rellenar" min="0.1" step="0.1" value="1">
+                </div>
+
+                <div class="navigation">
+                    <button id="btn-to-step1-from-2" class="outline">Anterior</button>
+                    <button id="btn-to-step3">Siguiente</button>
+                </div>
+            </div>
+
+            <!-- Paso 3: Generación de preguntas con IA -->
+            <div id="step3" class="step hidden">
+                <h3><span class="step-number">3</span>Generación de preguntas con IA</h3>
+                <p>Genere un prompt para crear preguntas utilizando IA. Puede definir un tema, nivel de dificultad o subir sus propios apuntes:</p>
+
+                <div class="panel-tabs">
+                    <div class="panel-tab active" data-panel="tema-panel">Por tema</div>
+                    <div class="panel-tab" data-panel="apuntes-panel">Por apuntes</div>
+                </div>
+
+                <div class="panel-content active" id="tema-panel">
+                    <div class="grid">
+                        <div>
+                            <label for="tema">Tema o asignatura:</label>
+                            <input type="text" id="tema" name="tema" placeholder="Ej. Historia de España, Matemáticas, Biología..." required>
+                        </div>
+                    </div>
+                    
+                    <div class="grid">
+                        <div>
+                            <label for="dificultad">Nivel de dificultad:</label>
+                            <select id="dificultad" name="dificultad">
+                                <option value="facil">Fácil</option>
+                                <option value="medio" selected>Medio</option>
+                                <option value="dificil">Difícil</option>
+                                <option value="muy_dificil">Muy difícil</option>
+                            </select>
+                        </div>
+                        <div>
+                            <fieldset>
+                                <legend>Modo de generación:</legend>
+                                <label>
+                                    <input type="radio" name="modo_generacion_tema" value="examenes_separados" checked>
+                                    Exámenes separados
+                                </label>
+                                <label>
+                                    <input type="radio" name="modo_generacion_tema" value="preguntas_adicionales">
+                                    Banco de preguntas
+                                </label>
+                            </fieldset>
+                        </div>
+                    </div>
+                
+                    <div id="examenes-separados-tema" class="opciones-modo">
+                        <div class="grid">
+                            <div>
+                                <label for="num_examenes">Número de exámenes distintos:</label>
+                                <input type="number" id="num_examenes" name="num_examenes" min="1" value="1">
+                                <small>Se generarán varios exámenes con el mismo número de preguntas cada uno.</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="preguntas-adicionales-tema" class="opciones-modo hidden">
+                        <div class="grid">
+                            <div>
+                                <p>Para cada tipo de pregunta, indica cuántas preguntas <strong>adicionales</strong> deseas generar:</p>
+            <small style="margin-bottom: 10px;">Estas se sumarán a las seleccionadas en el paso 1. Deja en 0 los tipos donde no quieras preguntas adicionales.</small>
+                            </div>
+                        </div>
+                        
+                        <div class="grid">
+                            <div>
+                                <label for="multi_adicionales_tema">Preguntas de opción múltiple:</label>
+                                <input type="number" id="multi_adicionales_tema" min="0" value="5">
+                            </div>
+                            <div>
+                                <label for="vf_adicionales_tema">Preguntas de verdadero/falso:</label>
+                                <input type="number" id="vf_adicionales_tema" min="0" value="5">
+                            </div>
+                        </div>
+                        
+                        <div class="grid">
+                            <div>
+                                <label for="rc_adicionales_tema">Preguntas de respuesta corta:</label>
+                                <input type="number" id="rc_adicionales_tema" min="0" value="5">
+                            </div>
+                            <div>
+                                <label for="re_adicionales_tema">Preguntas de rellenar espacios:</label>
+                                <input type="number" id="re_adicionales_tema" min="0" value="5">
+                            </div>
+                        </div>
+                        <small>Se generará un solo archivo con todas las preguntas.</small>
+                    </div>
+                        
+                    <div>
+                        <label for="indicaciones-adicionales">Indicaciones adicionales (opcional):</label>
+                        <textarea id="indicaciones-adicionales" name="indicaciones-adicionales" rows="3" 
+                            placeholder="Incluya cualquier detalle adicional sobre el contenido, enfoque o nivel educativo de las preguntas."></textarea>
+                    </div>
+                </div>
+
+                <div class="panel-content" id="apuntes-panel">
+                    <h4>Prompt para preguntas basadas en apuntes</h4>
+                    <p>Esta opción generará un prompt para crear preguntas a partir de apuntes o material didáctico que proporcionará directamente a la IA.</p>
+                    
+                    <div class="grid">
+                      <div>
+                          <fieldset>
+                              <legend>Modo de generación:</legend>
+                              <label>
+                                  <input type="radio" name="modo_generacion_apuntes" value="examenes_separados" checked>
+                                  Exámenes separados
+                              </label>
+                              <label>
+                                  <input type="radio" name="modo_generacion_apuntes" value="preguntas_adicionales">
+                                  Banco de preguntas
+                              </label>
+                          </fieldset>
+                      </div>
+                    </div>
+                  
+                    <div id="examenes-separados-apuntes" class="opciones-modo">
+                      <div class="grid">
+                          <div>
+                              <label for="num_examenes_apuntes">Número de exámenes distintos:</label>
+                              <input type="number" id="num_examenes_apuntes" name="num_examenes_apuntes" min="1" value="1">
+                              <small>Se generarán varios exámenes con el mismo número de preguntas cada uno.</small>
+                          </div>
+                      </div>
+                    </div>
+                    
+                    <div id="preguntas-adicionales-apuntes" class="opciones-modo hidden">
+                      <div class="grid">
+                          <div>
+                            <p>Para cada tipo de pregunta, indica cuántas preguntas <strong>adicionales</strong> deseas generar:</p>
+            <small style="margin-bottom: 10px;">Estas se sumarán a las seleccionadas en el paso 1. Deja en 0 los tipos donde no quieras preguntas adicionales.</small>
+                          </div>
+                      </div>
+                      
+                      <div class="grid">
+                          <div>
+                              <label for="multi_adicionales_apuntes">Preguntas de opción múltiple:</label>
+                              <input type="number" id="multi_adicionales_apuntes" min="0" value="5">
+                          </div>
+                          <div>
+                              <label for="vf_adicionales_apuntes">Preguntas de verdadero/falso:</label>
+                              <input type="number" id="vf_adicionales_apuntes" min="0" value="5">
+                          </div>
+                      </div>
+                      
+                      <div class="grid">
+                          <div>
+                              <label for="rc_adicionales_apuntes">Preguntas de respuesta corta:</label>
+                              <input type="number" id="rc_adicionales_apuntes" min="0" value="5">
+                          </div>
+                          <div>
+                              <label for="re_adicionales_apuntes">Preguntas de rellenar espacios:</label>
+                              <input type="number" id="re_adicionales_apuntes" min="0" value="5">
+                          </div>
+                      </div>
+                      <small>Se generará un solo archivo con todas las preguntas base más las adicionales.</small>
+                    </div>
+                    
+                    <div>
+                      <label for="instrucciones-apuntes">Instrucciones adicionales (opcional):</label>
+                      <textarea id="instrucciones-apuntes" rows="3" placeholder="Añada cualquier instrucción específica para la generación de preguntas (nivel educativo, enfoque, etc.)"></textarea>
+                    </div>
+                    
+                    <div class="info-box" style="margin-top: 15px; padding: 10px; background-color: #f0f8ff; border-left: 3px solid #1095c1; border-radius: 4px;">
+                      <h5 style="margin-top: 0;">¿Cómo funciona?</h5>
+                      <ol>
+                        <li>Seleccione los tipos y cantidad de preguntas en el paso anterior.</li>
+                        <li>Pulse en "Generar prompt para IA" para obtener un prompt especializado.</li>
+                        <li>Copie el prompt generado y utilícelo en su herramienta de IA favorita.</li>
+                        <li>Proporcione sus apuntes a la IA junto con el prompt (puede copiar/pegar sus apuntes o adjuntar un archivo según permita la herramienta).</li>
+                        <li>Guarde el resultado como archivo .txt para usarlo en el siguiente paso.</li>
+                      </ol>
+                      <p><small>Esta opción es ideal para crear exámenes basados en material didáctico específico.</small></p>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div>
+                        <button id="generar-prompt" class="primary">Generar prompt para IA</button>
+                    </div>
+                </div>
+
+                <div id="prompt-container" class="hidden" style="margin-top: 20px;">
+                    <h4>Prompt generado:</h4>
+                    <div id="prompt-output"></div>
+                    <button id="copy-prompt" class="copy-button">Copiar al portapapeles</button>
+                    <p><small>Copie este prompt y péguelo en su herramienta de IA preferida para generar las preguntas.</small></p>
+                </div>
+
+                <div class="navigation">
+                    <button id="btn-to-step2-from-3" class="outline">Anterior</button>
+                    <button id="btn-to-step4">Continuar a subida de archivo</button>
+                </div>
+            </div>
+
+            <!-- Paso 4: Archivo de entrada y formato de salida -->
+            <div id="step4" class="step hidden">
+                <h3><span class="step-number">4</span>Archivo de entrada y formato de salida</h3>
+                <p>Suba el archivo de texto con el contenido de su examen y seleccione el formato de salida:</p>
+
+                <form id="exam-form" class="grid">
+                    <div>
+                        <label for="entrada">Examen de entrada:</label>
+                        <input id="entrada" name="entrada" type="file" accept=".txt" required>
+                        <small>Asegúrese de que el archivo .txt contiene las preguntas separadas por líneas en blanco y
+                            las respuestas correctas marcadas con $$$.</small>
+                    </div>
+
+                    <div>
+                        <fieldset>
+                            <legend>Formato de salida:</legend>
+                            <div>
+                                <input type="radio" id="papel" name="script" value="papel.py" checked>
+                                <label for="papel">Papel (.txt)</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="moodle" name="script" value="moodle.py">
+                                <label for="moodle">Moodle (.xml)</label>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <div>
+                        <p></p>
+                        <div class="navigation">
+                            <button id="btn-to-step3-from-4" class="outline" type="button">Anterior</button>
+                            <button type="submit">Generar examen</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </article>
+
+        <!-- Resto del contenido HTML -->
+        <h2 id="instrucciones-de-uso">Instrucciones de uso</h2>
+        <ol type="1">
+            <li><strong>Seleccione los tipos de preguntas</strong> que desea incluir en su examen y la cantidad de cada
+                tipo.</li>
+            <li><strong>Configure las características</strong> de cada tipo de pregunta seleccionado (opciones,
+                puntuación, etc.)</li>
+            <li><strong>Genere preguntas con IA</strong> definiendo un tema, nivel educativo, dificultad o subiendo sus propios apuntes.</li>
+            <li><strong>Prepare el archivo de entrada</strong> con todas sus preguntas separadas por líneas en blanco.
+                La respuesta correcta debe estar marcada con "$$" al inicio.</li>
+            <li><strong>Suba el archivo</strong> y seleccione el formato de salida deseado (Papel o Moodle).</li>
+            <li><strong>Descargue</strong> el examen generado.</li>
+        </ol>
+
+        <h4 id="ejemplo-de-exámen-de-entrada">Ejemplos de formato para diferentes tipos de preguntas</h4>
+
+        <h5>Cabecera de variables (opcional)</h5>
+        <pre><code>entero,x1,20,25
+real,x2,0.3,0.4
+lista,x3,2,4,6,8
+@@@@</code></pre>
+
+        <h5>Preguntas de opción múltiple</h5>
+        <pre><code>¿Cuál es el cociente entre estos dos números @@ x1 @@, @@ x3 @@ ?
+$$Dividirlos y da como resultado: @@ x1/x3 @@
+Restarlos y da como resultado: @@ x1-x3 @@
+Ninguna de las anteriores</code></pre>
+
+        <h5>Preguntas de opción múltiple con enunciado multilínea</h5>
+        <pre><code>¿Estás de acuerdo con estas afirmaciones?
+- El doble de @@ x2 @@ es @@ x2*2 @@
+- El triple de @@ x2 @@ es @@ x2*3 @@ 
++++p
+$$Con las dos
+Con ninguna
+Con la primera sí, con la segunda no, sería @@ x2*4 @@
+Ninguna de las anteriores</code></pre>
+
+        <h5>Preguntas de verdadero/falso</h5>
+        <pre><code>La suma de @@ x1 @@ más @@ x3 @@ es mayor que 30.
+$$Verdadero
+Falso</code></pre>
+
+        <h5>Preguntas de respuesta corta</h5>
+        <pre><code>¿Cuál es el resultado de calcular @@ x1 @@ dividido entre @@ x3 @@? Escriba solo el número.
+$@@ x1/x3 @@</code></pre>
+
+        <h5>Preguntas de rellenar espacios</h5>
+        <pre><code>Complete la frase: La suma de @@ x1 @@ y @@ x3 @@ es _____.
+$@@ x1+x3 @@</code></pre>
+
+        <footer class="center">
+            <hr />
+            <p><small>Web construida con <a href="https://pyodide.org/">Pyodide</a> y <a
+                        href="https://picocss.com/">pico.css</small></a></p>
+        </footer>
+    </main>
+
+    <script src="app.js"></script>
+    <!-- Y añadir este script antes del cierre de body: -->
+    <script>
+        // Añadir un timeout para mostrar un mensaje de error si la carga tarda demasiado
+        setTimeout(function () {
+            const statusEl = document.getElementById('status');
+            const errorMessageEl = document.getElementById('error-message');
+
+            // Si después de 10 segundos todavía está cargando, mostrar mensaje de error
+            if (!statusEl.hidden) {
+                errorMessageEl.classList.remove('hidden');
+            }
+        }, 10000);
+    </script>
+</body>
+
+</html>
