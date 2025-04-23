@@ -26,6 +26,30 @@ para todos](https://lacienciaparatodos.wordpress.com/).
 
 Posteriormente, esta web fue desarrollada por [Jorge Barata](https://twitter.com/neuralhacker), facilitando el uso del programa sin necesidad de usar Google Colab.
 
+Además, Juan Diego Rodríguez Cabrero ha añadido diversas funcionalidades al programa, entre ellas:
+
+- Preguntas de verdadero o falso
+
+- Preguntas de respuesta corta
+
+- Preguntas de rellenar espacios
+
+Selección del número y tipo de preguntas
+
+Caracterización de las preguntas, incluyendo:
+
+- Número de respuestas en preguntas de opción múltiple
+
+- Penalización o no de respuesta incorrecta
+
+- Puntuación de la respuesta correcta
+
+Generación de prompts para IA, permitiendo:
+
+- Seleccionar tema y nivel de dificultad
+
+- Subir tus propios apuntes como base de generación
+
 ## Instrucciones de uso
 
 1.  Prepara el examen de entrada (<a href="examen2.txt" download="examen.txt">ejemplo</a>)
