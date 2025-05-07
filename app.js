@@ -13,6 +13,11 @@ const OUTPUT_FILENAMES = {
 const SCRIPTS = {};
 const statusEl = document.getElementById('status');
 var pyodide = null;
+// Variables para imágenes asociadas a preguntas
+const imagenesSubidas = {};
+const asignacionImagenes = {};
+let preguntasCargadas = [];
+
 
 // Elementos DOM para navegación entre pasos
 const step1 = document.getElementById('step1');
@@ -450,7 +455,50 @@ document.addEventListener('DOMContentLoaded', function() {
             togglePenalizacionConfig(this.name.split('_')[1]);
         });
     });
-    
+    // Cargar preguntas del archivo
+const entradaInput = document.getElementById('entrada');
+entradaInput.addEventListener('change', (e) => {
+  const archivo = e.target.files[0];
+  if (!archivo) return;
+// Capturar imágenes seleccionadas por pregunta
+preguntasCargadas.forEach((pregunta, idx) => {
+    const select = document.getElementById(`select-img-${idx}`);
+    asignacionImagenes[pregunta] = select.value || null;
+  });
+  
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    const contenido = evt.target.result;
+    preguntasCargadas = contenido.split('\n').filter(linea => linea.trim() !== '');
+    mostrarAsignacionImagenes();
+  };
+  reader.readAsText(archivo);
+});
+
+
+
+// Mostrar select de imágenes para cada pregunta
+function mostrarAsignacionImagenes() {
+  const contenedor = document.getElementById('asignacion-imagenes');
+  contenedor.innerHTML = '';
+
+  if (preguntasCargadas.length === 0) return;
+
+  preguntasCargadas.forEach((pregunta, idx) => {
+    const div = document.createElement('div');
+    div.style.marginBottom = '1rem';
+
+    div.innerHTML = `
+      <label><strong>Pregunta:</strong> ${pregunta}</label><br>
+      <select id="select-img-${idx}">
+        <option value="">-- Sin imagen --</option>
+        ${Object.keys(imagenesSubidas).map(img => `<option value="${img}">${img}</option>`).join('')}
+      </select>
+    `;
+    contenedor.appendChild(div);
+  });
+}
+
     // Generar el examen al enviar el formulario
     var form = document.getElementById('exam-form');
     if (form) {
@@ -768,9 +816,12 @@ function prepareExamContent(inputContent, config) {
     }
     
     if (tiposFaltantes.length > 0) {
-        alert(`Advertencia: No se encontraron preguntas de los siguientes tipos: ${tiposFaltantes.join(', ')}. ` +
-            'Es posible que el formato no sea correcto o que falten preguntas de estos tipos.');
+        throw new Error(
+            `No se encontraron preguntas de los siguientes tipos: ${tiposFaltantes.join(', ')}.\n\n` +
+            `Por favor, sube un archivo que contenga preguntas de esos tipos o modifica la configuración del examen.`
+        );
     }
+    
 
     // Contar el número total de preguntas detectadas
     const totalPreguntasDetectadas = 
@@ -989,17 +1040,89 @@ function processForm(e) {
     var inputFile = entrada.files[0];
     var reader = new FileReader();
     reader.readAsText(inputFile);
-    reader.onload = evt => {
+    reader.onload = async (evt) => {
+
         try {
+            
             // Preparar el contenido según la configuración
             var inputContent = evt.target.result;
             var processedContent = prepareExamContent(inputContent, examConfig);
 
             // Escribir el examen de entrada en el sistema de archivos virtual de Pyodide
-            pyodide.FS.writeFile("examen.txt", processedContent, { encoding: "utf8" });
+            
+    // Validaciones antes de ejecutar generación de examen
+    if (!pyodide) {
+        alert("Error: Pyodide no está completamente cargado. Espere unos segundos y vuelva a intentarlo.");
+        return;
+    }
+
+    if (!processedContent || processedContent.trim().length === 0) {
+        alert("Error: El archivo subido está vacío. Por favor, sube un archivo con contenido válido.");
+        return;
+    }
+
+    const totalPreguntas = preguntasCargadas.length;
+    const preguntasSolicitadas = Object.values(examConfig.questionTypes).reduce((acc, val) => acc + val, 0);
+
+
+    if (preguntasSolicitadas > totalPreguntas) {
+        alert(`Error: Has solicitado ${preguntasSolicitadas} preguntas, pero solo hay ${totalPreguntas} disponibles.`);
+        return;
+    }
+
+    
+    // Validación adicional: comprobar si hay suficientes opciones por pregunta múltiple
+ 
+
+    const bloques = processedContent.split(/\n\s*\n/).filter(b => b.trim().length > 0);
+    const erroresOpciones = [];
+
+    const numOpcionesMulti = examConfig.config.multirespuesta.opciones || 4;
+
+bloques.forEach((bloque, idx) => {
+    const lineas = bloque.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    if (lineas.length < 2) return;
+
+    const enunciado = lineas[0].toLowerCase();
+    const respuestas = lineas.slice(1);
+    const respuestaCorrecta = respuestas.find(r => r.startsWith('$$$'));
+    const numOpciones = respuestas.length;
+
+    // Detectar si es de opción múltiple:
+    const pareceVF = respuestas.length === 2 &&
+        respuestas.some(r => r.toLowerCase().includes("verdadero")) &&
+        respuestas.some(r => r.toLowerCase().includes("falso"));
+
+    const pareceRellenar = enunciado.includes("_____") || enunciado.includes("complete la frase");
+    const pareceCorta = respuestas.length === 1 && !pareceRellenar;
+
+    const esOpcionMultiple = respuestaCorrecta && !pareceVF && !pareceCorta && !pareceRellenar;
+
+    if (esOpcionMultiple && numOpciones < numOpcionesMulti) {
+        erroresOpciones.push(`Pregunta ${idx + 1} tiene solo ${numOpciones} opciones (mínimo requerido: ${numOpcionesMulti})`);
+    }
+});
+
+
+
+    if (erroresOpciones.length > 0) {
+        alert("Error: Se encontraron preguntas de opción múltiple con menos opciones de las requeridas:\n\n" + erroresOpciones.join('\n'));
+        return;
+    }
+
+    pyodide.FS.writeFile("examen.txt", processedContent, { encoding: "utf8" });
+            // Guardar imágenes en el FS de Pyodide
+for (const [nombre, archivo] of Object.entries(imagenesSubidas)) {
+    const arrayBuffer = await archivo.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+    pyodide.FS.writeFile(nombre, bytes);
+  }
+  
 
             // Ejecutar el script
             pyodide.globals.clear();
+            pyodide.globals.set("ASIGNACION_IMAGENES", asignacionImagenes);
+
             pyodide.runPython(PYTHON_GOOGLE_MOCK);
 
             // Modificar el script según la configuración antes de ejecutarlo

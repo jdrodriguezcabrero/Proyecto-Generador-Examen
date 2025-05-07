@@ -12,6 +12,8 @@
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
     <script src="https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+
     <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
 
     <style>
@@ -216,6 +218,13 @@
 </head>
 
 <body>
+<header style="text-align: center; padding: 10px;">
+    <img src="logos/IES-Oretania_logo.jpg" alt="IES Oretania" style="height: 60px; margin-right: 20px;">
+    <img src="logos/sinbad.png" alt="Sinbad2" style="height: 60px; margin-right: 20px;">
+    <img src="logos/Uja.png" alt="Universidad de Jaén" style="height: 60px;">
+</header>
+<hr>
+
     <main class="container">
         <header>
             <nav>
@@ -355,6 +364,7 @@
                 <div class="panel-tabs">
                     <div class="panel-tab active" data-panel="tema-panel">Por tema</div>
                     <div class="panel-tab" data-panel="apuntes-panel">Por apuntes</div>
+                    <div class="panel-tab" data-panel="api-panel">Conexión IA (requiere clave)</div>
                 </div>
 
                 <div class="panel-content active" id="tema-panel">
@@ -519,6 +529,43 @@
                     </div>
                 </div>
 
+                <div class="panel-content hidden" id="api-panel">
+                    <h4>Generar preguntas con IA directamente</h4>
+                    <p>Usa una clave de OpenAI para generar preguntas directamente desde esta aplicación.</p>
+                  
+                    <label for="api-key">Clave API de OpenAI:</label>
+                    <input type="password" id="api-key" placeholder="sk-..." style="width:100%;" />
+                    <small>
+                        ¿No tienes clave? <a href="https://platform.openai.com/account/api-keys" target="_blank">Consíguela aquí</a> (requiere cuenta gratuita).
+                      </small>
+                      
+                  
+                    <label for="modelo-ia">Modelo:</label>
+                    <select id="modelo-ia">
+                      <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                      <option value="gpt-4">GPT-4</option>
+                    </select>
+                  
+                    <label for="tema-api">Tema o asignatura:</label>
+                    <input type="text" id="tema-api" placeholder="Ej. Historia de España, Matemáticas..." />
+                  
+                    <label for="dificultad-api">Nivel de dificultad:</label>
+                    <select id="dificultad-api">
+                      <option value="facil">Fácil</option>
+                      <option value="medio" selected>Medio</option>
+                      <option value="dificil">Difícil</option>
+                      <option value="muy_dificil">Muy difícil</option>
+                    </select>
+                  
+                    <label for="archivo-apuntes">Subir archivo de apuntes (.txt o .pdf):</label>
+                    <input type="file" id="archivo-apuntes" accept=".txt,.pdf">
+                  
+                    <button id="generar-desde-api" class="primary">Generar preguntas</button>
+                  
+                    <div id="resultado-api" style="margin-top: 15px;"></div>
+                  </div>
+                  
+
                 <div class="grid">
                     <div>
                         <button id="generar-prompt" class="primary">Generar prompt para IA</button>
@@ -572,8 +619,23 @@
                             <button type="submit">Generar examen</button>
                         </div>
                     </div>
+                    <!--
+                    <div id="asignacion-imagenes" class="mt-4">
+                         
+                    </div>
+                    -->
                 </form>
             </div>
+
+            <div id="preview-container" class="hidden" style="margin-top: 20px;">
+                <h4>Vista previa del examen:</h4>
+                <div id="preview-content" style="background: #f4f4f4; padding: 1em; border-radius: 6px;"></div>
+
+                <button id="btn-guardar-txt" class="outline" style="margin-top: 20px;">💾 Guardar como archivo .txt</button>
+
+              </div>
+              
+              
 
         </article>
 
@@ -586,7 +648,7 @@
                 puntuación, etc.)</li>
             <li><strong>Genere preguntas con IA</strong> definiendo un tema, nivel educativo, dificultad o subiendo sus propios apuntes.</li>
             <li><strong>Prepare el archivo de entrada</strong> con todas sus preguntas separadas por líneas en blanco.
-                La respuesta correcta debe estar marcada con "$$" al inicio.</li>
+                La respuesta correcta debe estar marcada con "$$$" al inicio.</li>
             <li><strong>Suba el archivo</strong> y seleccione el formato de salida deseado (Papel o Moodle).</li>
             <li><strong>Descargue</strong> el examen generado.</li>
         </ol>
@@ -601,7 +663,7 @@ lista,x3,2,4,6,8
 
         <h5>Preguntas de opción múltiple</h5>
         <pre><code>¿Cuál es el cociente entre estos dos números @@ x1 @@, @@ x3 @@ ?
-$$Dividirlos y da como resultado: @@ x1/x3 @@
+$$$Dividirlos y da como resultado: @@ x1/x3 @@
 Restarlos y da como resultado: @@ x1-x3 @@
 Ninguna de las anteriores</code></pre>
 
@@ -610,14 +672,14 @@ Ninguna de las anteriores</code></pre>
 - El doble de @@ x2 @@ es @@ x2*2 @@
 - El triple de @@ x2 @@ es @@ x2*3 @@ 
 +++p
-$$Con las dos
+$$$Con las dos
 Con ninguna
 Con la primera sí, con la segunda no, sería @@ x2*4 @@
 Ninguna de las anteriores</code></pre>
 
         <h5>Preguntas de verdadero/falso</h5>
         <pre><code>La suma de @@ x1 @@ más @@ x3 @@ es mayor que 30.
-$$Verdadero
+$$$Verdadero
 Falso</code></pre>
 
         <h5>Preguntas de respuesta corta</h5>
@@ -628,13 +690,7 @@ $@@ x1/x3 @@</code></pre>
         <pre><code>Complete la frase: La suma de @@ x1 @@ y @@ x3 @@ es _____.
 $@@ x1+x3 @@</code></pre>
 
-        <footer class="center">
-            <hr />
-            <p><small>Web construida con <a href="https://pyodide.org/">Pyodide</a> y <a
-                        href="https://picocss.com/">pico.css</small></a></p>
-        </footer>
     </main>
-
     <script src="app.js"></script>
     <!-- Y añadir este script antes del cierre de body: -->
     <script>
@@ -649,6 +705,254 @@ $@@ x1+x3 @@</code></pre>
             }
         }, 10000);
     </script>
+
+<script>
+    document.getElementById("generar-desde-api").addEventListener("click", async () => {
+      const apiKey = document.getElementById("api-key").value.trim();
+      const modelo = document.getElementById("modelo-ia").value;
+      const tema = document.getElementById("tema-api").value.trim();
+      const dificultad = document.getElementById("dificultad-api").value;
+      const fileInput = document.getElementById("archivo-apuntes");
+      const resultDiv = document.getElementById("resultado-api");
+  
+      if (!apiKey || !fileInput.files.length) {
+        alert("Por favor sube un archivo de apuntes y proporciona una clave API.");
+        return;
+      }
+  
+      const file = fileInput.files[0];
+      let fileText = "";
+  
+      if (file.name.endsWith(".pdf")) {
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        const pdf = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise;
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          fileText += textContent.items.map(item => item.str).join(" ") + "\n";
+        }
+      } else {
+        fileText = await file.text();
+      }
+  
+      // Construir prompt dinámicamente
+      let prompt = "Genera preguntas tipo test y verdadero/falso";
+      if (tema) prompt += ` sobre el tema \"${tema}\"`;
+      if (dificultad) prompt += ` con nivel \"${dificultad}\"`;
+      prompt += ` usando los siguientes apuntes:\n\n${fileText}`;
+  
+      resultDiv.innerHTML = "<em>Generando...</em>";
+  
+      try {
+        const respuesta = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: modelo,
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.7,
+            max_tokens: 1200
+          })
+        });
+  
+        const data = await respuesta.json();
+  
+        if (respuesta.status === 429) {
+          if (modelo === "gpt-4") {
+            resultDiv.innerHTML = `<span style='color:red;'>Parece que tu cuenta no tiene acceso a GPT-4. Intenta usar GPT-3.5 o revisa tu cuenta en OpenAI.</span>`;
+          } else {
+            resultDiv.innerHTML = `<span style='color:red;'>Límite de peticiones alcanzado o recursos temporales agotados. Intenta más tarde.</span>`;
+          }
+        } else if (!respuesta.ok) {
+          resultDiv.innerHTML = `<span style='color:red;'>Error ${respuesta.status}: ${data.error?.message || "Petición fallida."}</span>`;
+        } else {
+          resultDiv.innerHTML = `<pre>${data.choices?.[0]?.message?.content || "No se obtuvo respuesta."}</pre>`;
+        }
+  
+      } catch (error) {
+        resultDiv.innerHTML = `<span style='color:red;'>Error de red o inesperado: ${error.message}</span>`;
+      }
+    });
+  </script>
+
+<script>
+    const imagenesAsignadas = {}; // clave: índice de pregunta, valor: archivo
+  
+    document.getElementById("entrada").addEventListener("change", async function () {
+      const file = this.files[0];
+      const previewContainer = document.getElementById("preview-container");
+      const previewContent = document.getElementById("preview-content");
+  
+      if (!file || !file.name.endsWith(".txt")) {
+        previewContainer.classList.add("hidden");
+        previewContent.innerHTML = "";
+        return;
+      }
+  
+      const text = await file.text();
+      const bloques = text.split(/\n\s*\n/); // separación por línea en blanco
+      const render = [];
+  
+      bloques.forEach((bloque, index) => {
+        const lineas = bloque.trim().split("\n").map(l => l.trim());
+        if (lineas.length === 0) return;
+  
+        const idPregunta = `pregunta-${index}`;
+        let html = "";
+        let tipo = "";
+  
+        if (lineas[1]?.startsWith("$$$") && lineas.length >= 3) {
+          tipo = "Opción múltiple";
+          const enunciado = lineas[0];
+          const opciones = lineas.slice(1).map((op, i) => {
+            const esCorrecta = op.startsWith("$$$");
+            const texto = op.replace("$$$", "").trim();
+            return `
+              <li>
+                <label>
+                  <input type="radio" name="correcta-${index}" ${esCorrecta ? "checked" : ""}>
+                  <input type="text" value="${texto}">
+                </label>
+              </li>`;
+          });
+  
+          html = `
+            <strong>${tipo}</strong><br>
+            <input type="text" value="${enunciado}" style="width:100%; margin-bottom:5px;"><br>
+            <ul>${opciones.join("")}</ul>
+          `;
+        } else if (lineas.length === 2 && (lineas[1].startsWith("$$$") || lineas[1] === "Verdadero" || lineas[1] === "Falso")) {
+          tipo = "Verdadero/Falso";
+          const enunciado = lineas[0];
+          const respuesta = lineas[1].replace("$$$", "");
+  
+          html = `
+            <strong>${tipo}</strong><br>
+            <input type="text" value="${enunciado}" style="width:100%; margin-bottom:5px;"><br>
+            <select>
+              <option value="Verdadero" ${respuesta === "Verdadero" ? "selected" : ""}>Verdadero</option>
+              <option value="Falso" ${respuesta === "Falso" ? "selected" : ""}>Falso</option>
+            </select>
+          `;
+        } else if (lineas[1]?.startsWith("$")) {
+          tipo = "Respuesta corta o rellenar espacios";
+          html = `
+            <strong>${tipo}</strong><br>
+            <input type="text" value="${lineas[0]}" style="width:100%; margin-bottom:5px;"><br>
+            <input type="text" value="${lineas[1].replace("$", "")}" style="width:100%;">
+          `;
+        } else {
+          tipo = "Texto libre o formato no reconocido";
+          html = `<strong>${tipo}</strong><pre>${bloque}</pre>`;
+        }
+  
+        render.push(`
+          <div id="${idPregunta}" style="margin-bottom: 1em; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+            ${html}
+            <div style="margin-top: 5px;">
+              <button onclick="document.getElementById('img-${index}').click()">📷 Asignar imagen</button>
+              <input type="file" id="img-${index}" accept="image/*" style="display:none" onchange="asignarImagen(event, ${index})">
+              <div id="img-preview-${index}" style="margin-top:5px;"></div>
+            </div>
+            <button onclick="eliminarPregunta('${idPregunta}')">❌ Eliminar</button>
+          </div>
+        `);
+      });
+  
+      previewContent.innerHTML = render.join("");
+      previewContainer.classList.remove("hidden");
+    });
+  
+    function eliminarPregunta(id) {
+      const pregunta = document.getElementById(id);
+      if (pregunta) {
+        pregunta.remove();
+      }
+    }
+  
+    function asignarImagen(event, index) {
+      const archivo = event.target.files[0];
+      if (!archivo) return;
+  
+      imagenesAsignadas[index] = archivo;
+  
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = `<img src="${e.target.result}" alt="Imagen pregunta" style="max-width: 200px; display:block;">`;
+        document.getElementById(`img-preview-${index}`).innerHTML = img;
+      };
+      reader.readAsDataURL(archivo);
+    }
+  </script>
+
+<script>
+    document.getElementById("btn-guardar-txt").addEventListener("click", () => {
+      const preguntas = document.querySelectorAll("#preview-content > div");
+      const lineas = [];
+  
+      preguntas.forEach((bloque, i) => {
+        const strong = bloque.querySelector("strong");
+        const tipo = strong?.textContent?.trim();
+  
+        if (tipo === "Opción múltiple") {
+          const enunciado = bloque.querySelector("input[type='text']").value;
+          lineas.push(enunciado);
+  
+          const opciones = bloque.querySelectorAll("ul li");
+          opciones.forEach(li => {
+            const inputRadio = li.querySelector("input[type='radio']");
+            const inputTexto = li.querySelector("input[type='text']");
+            const texto = inputTexto.value.trim();
+            const linea = inputRadio.checked ? `$$$${texto}` : texto;
+            lineas.push(linea);
+          });
+        }
+  
+        else if (tipo === "Verdadero/Falso") {
+          const enunciado = bloque.querySelector("input[type='text']").value;
+          const seleccion = bloque.querySelector("select").value;
+          lineas.push(enunciado);
+          lineas.push(`$$$${seleccion}`);
+        }
+  
+        else if (tipo === "Respuesta corta o rellenar espacios") {
+          const enunciado = bloque.querySelectorAll("input[type='text']")[0].value;
+          const respuesta = bloque.querySelectorAll("input[type='text']")[1].value;
+          lineas.push(enunciado);
+          lineas.push(`$${respuesta}`);
+        }
+  
+        else {
+          // tipo libre
+          lineas.push(bloque.textContent.trim());
+        }
+  
+        lineas.push(""); // separador entre preguntas
+      });
+  
+      const textoFinal = lineas.join("\n");
+      const blob = new Blob([textoFinal], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const enlace = document.createElement("a");
+      enlace.href = url;
+      enlace.download = "examen_editado.txt";
+      enlace.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+  
+  
+<hr>
+<footer style="text-align: center; padding: 20px; font-size: 0.9em; color: gray;">
+    <p>© 2025 Juan Diego Rodríguez Cabrero</p>
+    <p>Contacto: <a href="mailto:jdrodriguezcabrero@hotmail.com">jdrodriguezcabrero@hotmail.com</a></p>
+    <p>Este sitio forma parte del proyecto educativo desarrollado en colaboración con I.E.S. Oretania, Universidad de Jaén y Sinbad².</p>
+</footer>
+
 </body>
 
 </html>
