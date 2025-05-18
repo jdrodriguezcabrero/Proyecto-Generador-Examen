@@ -8,7 +8,7 @@
     <meta name="description"
         content="Programa para generar exámenes con diversos tipos de preguntas, para imprimir y para Moodle">
     <meta name="keywords" content="exámen, Moodle, aleatorio, multirespuesta, verdadero/falso">
-    <meta name="author" content="Javier F. Panadero">
+    <meta name="author" content="Juan Diego Rodríguez Cabrero">
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
     <script src="https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js"></script>
@@ -183,7 +183,6 @@
             background-color: #1095c1;
         }
 
-        /* Mejora visual para las opciones avanzadas */
         #opciones-avanzadas-panel fieldset {
             margin-bottom: 1rem;
             padding: 0.75rem;
@@ -202,7 +201,7 @@
             color: #666;
         }
 
-        /* Resaltar inputs numéricos */
+
         #opciones-avanzadas-panel input[type="number"] {
             background-color: #f8f8f8;
             border: 1px solid #ddd;
@@ -214,14 +213,147 @@
             border-color: #1095c1;
             box-shadow: 0 0 0 2px rgba(16, 149, 193, 0.2);
         }
+        /* Color de fondo general y texto */
+body {
+    background-color: #006d38;
+    color: #ffffff;
+}
+
+/* Secciones clave con fondo blanco y texto oscuro para buen contraste */
+main, .step, .question-type, .opciones-modo, .penalizacion-config, #prompt-output {
+    background-color: #ffffff;
+    color: #000000;
+    border-radius: 8px;
+}
+
+/* Botones primarios */
+button,
+button.primary,
+button[type="submit"] {
+    background-color: #00a64f;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover,
+button.primary:hover,
+button[type="submit"]:hover {
+    background-color: #007f3a;
+}
+
+/* Botones de borde (outline) */
+button.outline {
+    background-color: transparent;
+    border: 2px solid #00a64f;
+    color: #00a64f;
+    font-weight: bold;
+}
+
+button.outline:hover {
+    background-color: #00a64f;
+    color: white;
+}
+
+/* Enlaces */
+a {
+    color: #00cc66;
+    font-weight: 500;
+    text-decoration: underline;
+}
+
+a:hover {
+    color: #00ff88;
+}
+
+/* Inputs con mejor contraste */
+input, select, textarea {
+    background-color: #ffffff;
+    color: #000000;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 0.5rem;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #00a64f;
+    box-shadow: 0 0 0 2px rgba(0, 166, 79, 0.25);
+}
+/* Encabezados sobre fondo oscuro (como el nav o body) */
+body > h1, body > h2, header h1, header h2 {
+    color: white;
+}
+
+/* Encabezados dentro de secciones claras (como .step, .question-type, etc.) */
+.step h3, .step h4,
+.question-type h4,
+.opciones-modo h4,
+.panel-content h4,
+#step4 h3 {
+    color: black;
+}
+
+
+
+/* Separadores con mejor integración */
+hr {
+    border: none;
+    border-top: 1px solid #ffffff33;
+    margin: 2rem 0;
+}
+
+footer {
+    background-color: transparent;
+    color: #ffffff;
+    font-weight: 500;
+    font-size: 1rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+
+
+/* Enlaces más refinados */
+a {
+    color: #7fffb2;
+    text-decoration: underline;
+}
+
+a:hover {
+    color: #afffd7;
+}
+
+/* Mejora de nav-step fondo claro en tema oscuro */
+.nav-step {
+    background-color: #e8f5ec;
+    color: #000;
+}
+
+.nav-step.active {
+    background-color: #00a64f;
+    color: white;
+}
+
+ç
+.step h3, .step h4,
+.question-type h4,
+.opciones-modo h4,
+.panel-content h4,
+#step4 h3 {
+    color: #000000;
+}
+
+
     </style>
 </head>
 
-<body>
+<body style="background-color: #006d38; color: white;">
 <header style="text-align: center; padding: 10px;">
-    <img src="logos/IES-Oretania_logo.jpg" alt="IES Oretania" style="height: 60px; margin-right: 20px;">
+    <img src="logos/IES-Oretania_logo.jpg" alt="IES Oretania" style="height: 200px; margin-right: 20px;">
     <img src="logos/sinbad.png" alt="Sinbad2" style="height: 60px; margin-right: 20px;">
-    <img src="logos/Uja.png" alt="Universidad de Jaén" style="height: 60px;">
+    <img src="logos/Uja.png" alt="Universidad de Jaén" style="height: 200px;">
 </header>
 <hr>
 
@@ -947,7 +1079,8 @@ $@@ x1+x3 @@</code></pre>
   
   
 <hr>
-<footer style="text-align: center; padding: 20px; font-size: 0.9em; color: gray;">
+<footer style="text-align: center; padding: 20px; font-size: 1rem; color: #ffffff; font-weight: 500; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">
+
     <p>© 2025 Juan Diego Rodríguez Cabrero</p>
     <p>Contacto: <a href="mailto:jdrodriguezcabrero@hotmail.com">jdrodriguezcabrero@hotmail.com</a></p>
     <p>Este sitio forma parte del proyecto educativo desarrollado en colaboración con I.E.S. Oretania, Universidad de Jaén y Sinbad².</p>
