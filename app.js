@@ -480,6 +480,7 @@ preguntasCargadas.forEach((pregunta, idx) => {
 // Mostrar select de imágenes para cada pregunta
 function mostrarAsignacionImagenes() {
   const contenedor = document.getElementById('asignacion-imagenes');
+  if (!contenedor) return;
   contenedor.innerHTML = '';
 
   if (preguntasCargadas.length === 0) return;

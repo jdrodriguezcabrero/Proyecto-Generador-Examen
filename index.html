@@ -11,10 +11,13 @@
     <meta name="author" content="Juan Diego Rodríguez Cabrero">
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script src="pyodide.js"></script>
+<script src="pyodide.asm.js" type="text/javascript"></script>
+<script src="pdf.min.js"></script>
+<link rel="stylesheet" href="pico.min.css">
 
-    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+
+
 
     <style>
         .center {
@@ -350,11 +353,13 @@ a:hover {
 </head>
 
 <body style="background-color: #006d38; color: white;">
-<header style="text-align: center; padding: 10px;">
+
+<header style="text-align: center; padding: 10px; background-color: white;">
     <img src="logos/IES-Oretania_logo.jpg" alt="IES Oretania" style="height: 200px; margin-right: 20px;">
     <img src="logos/sinbad.png" alt="Sinbad2" style="height: 60px; margin-right: 20px;">
     <img src="logos/Uja.png" alt="Universidad de Jaén" style="height: 200px;">
 </header>
+
 <hr>
 
     <main class="container">
@@ -668,8 +673,9 @@ a:hover {
                     <label for="api-key">Clave API de OpenAI:</label>
                     <input type="password" id="api-key" placeholder="sk-..." style="width:100%;" />
                     <small>
-                        ¿No tienes clave? <a href="https://platform.openai.com/account/api-keys" target="_blank">Consíguela aquí</a> (requiere cuenta gratuita).
-                      </small>
+  ¿No tienes clave? <a href="https://platform.openai.com/account/api-keys" target="_blank" style="color: black; font-weight: bold;">Consíguela aquí</a> (requiere cuenta gratuita).
+</small>
+
                       
                   
                     <label for="modelo-ia">Modelo:</label>
@@ -751,12 +757,11 @@ a:hover {
                             <button type="submit">Generar examen</button>
                         </div>
                     </div>
-                    <!--
-                    <div id="asignacion-imagenes" class="mt-4">
-                         
-                    </div>
-                    -->
+                   
+                    
+                   
                 </form>
+                
             </div>
 
             <div id="preview-container" class="hidden" style="margin-top: 20px;">
