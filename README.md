@@ -15,6 +15,90 @@ Ofrece las siguientes funcionalidades:
 
 La idea es que podáis escribir el examen de manera **cómoda e intuitiva**.
 
+📝 INSTRUCCIONES DE USO - GENERADOR DE EXÁMENES
+
+Este proyecto necesita un servidor local para funcionar correctamente. Si abres el archivo index.html directamente (doble clic), algunos navegadores bloquearán la carga de módulos esenciales como Pyodide.
+
+📦 CONTENIDO NECESARIO:
+Asegúrate de que todos estos archivos estén en la misma carpeta:
+- index.html
+- pyodide.js
+- pyodide.asm.js
+- pyodide.asm.wasm
+- pyodide.asm.data
+- pyodide_py.tar
+- distutils.tar
+- packages.json
+- pdf.min.js
+- pico.min.css
+- app.js
+- papel.py
+- moodle.py
+- examen.txt (y cualquier archivo de preguntas)
+
+🚀 PASOS PARA USAR LA APLICACIÓN
+
+⚠️ NOTA IMPORTANTE SOBRE PERMISOS
+
+Al hacer doble clic sobre el archivo `Iniciar_Servidor_Examenes.bat`, es posible que Windows muestre advertencias de seguridad como:
+
+- "¿Deseas permitir que esta aplicación realice cambios en el dispositivo?"
+- O bien, el antivirus puede preguntar si deseas ejecutar un archivo de comandos.
+
+Esto es normal porque el archivo `.bat` intenta ejecutar un servidor local en tu propio equipo.
+
+✅ Qué debes hacer:
+- Asegúrate de que el archivo proviene de una fuente confiable (este proyecto).
+- Haz clic en “Sí” o “Permitir” para continuar.
+- Si ves advertencias de tu antivirus, puedes marcar el archivo como seguro o confiar temporalmente.
+
+El script **no instala nada** ni accede a internet, simplemente ejecuta `python -m http.server` en la carpeta actual y abre el navegador.
+
+
+
+1. **Requisitos previos**
+   - Tener Python instalado en el equipo (https://www.python.org)
+
+2. **Iniciar el servidor local**
+   - Haz doble clic en el archivo: `Iniciar_Servidor_Examenes.bat`
+
+3. **Abrir en el navegador**
+   - El navegador se abrirá automáticamente en: http://localhost:8000
+   - Allí podrás usar el Generador de Exámenes sin errores.
+
+❗IMPORTANTE:
+- No abras `index.html` directamente desde el explorador de archivos (file:///...), ya que los navegadores bloquean módulos ES6 desde rutas locales.
+- Si ves errores relacionados con `pyodide` o `import`, asegúrate de estar usando el servidor local.
+
+📧 Contacto:
+Para dudas, contactar con el desarrollador del proyecto.
+
+
+---
+
+## 🔧 Requisitos técnicos para ejecutar correctamente
+
+Algunos navegadores (especialmente Chrome) **bloquean la ejecución de módulos locales desde archivos `file:///`**, lo que puede impedir que el proyecto funcione correctamente si se abre con doble clic.
+
+Para garantizar el funcionamiento completo:
+
+### ✅ Opción recomendada: Usar un servidor local
+
+1. Asegúrate de tener Python instalado.
+2. Usa el archivo `Iniciar_Servidor_Examenes.bat` incluido en el proyecto.
+   - Al ejecutarlo, abrirá automáticamente el navegador en la dirección correcta.
+   - Esto elimina errores como: `pyodide is null`, `La URI de origen del módulo no está permitida`, etc.
+
+Si lo prefieres, puedes iniciar el servidor manualmente con:
+
+```bash
+python -m http.server 8000
+```
+
+y luego ir a: http://localhost:8000
+
+---
+
 #### Licencia
 
 **Generador de Exámenes** se ofrece bajo licencia [CC BY,NC,SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es), quedando expresamente prohibido su uso comercial.
@@ -26,7 +110,7 @@ para todos](https://lacienciaparatodos.wordpress.com/).
 
 Posteriormente, esta web fue desarrollada por [Jorge Barata](https://twitter.com/neuralhacker), facilitando el uso del programa sin necesidad de usar Google Colab.
 
-Además, Juan Diego Rodríguez Cabrero ha añadido diversas funcionalidades al programa, entre ellas:
+Además, [Juan Diego Rodríguez Cabrero] ha añadido diversas funcionalidades al programa, entre ellas:
 
 - Preguntas de verdadero o falso
 
