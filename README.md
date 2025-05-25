@@ -1,6 +1,5 @@
 ## Generador de Exámenes
 
-
 **Generador de Exámenes** es un herramienta que facilita la **creación de exámenes respuesta múltiple con diferentes valores**.
 
 Los exámenes se pueden descargar en formato texto para imprimir en papel o en formato XML para las aulas virtuales de [Moodle](https://moodle.org/).
@@ -12,14 +11,39 @@ Ofrece las siguientes funcionalidades:
 * Admite preguntas multilínea (OPCIONAL)
 * Admite valores aleatorios y cálculos con ellos en enunciados y respuestas. (OPCIONAL)
 * Da la clave de corrección
-
+  
 La idea es que podáis escribir el examen de manera **cómoda e intuitiva**.
 
-📝 INSTRUCCIONES DE USO - GENERADOR DE EXÁMENES
+---
+##  Tabla de Contenidos
+
+- [Generador de Exámenes](#generador-de-exámenes)
+- [Tabla de Contenidos](#tabla-de-contenidos)
+- [Requisitos técnicos para ejecutar correctamente](#requisitos-técnicos-para-ejecutar-correctamente)
+  - [Opción recomendada: Usar un servidor local](#opción-recomendada-usar-un-servidor-local)
+- [Problemas comunes](#problemas-comunes)
+  - [Errores típicos y sus soluciones](#errores-típicos-y-sus-soluciones)
+- [Estructura del Proyecto](#estructura-del-proyecto)
+  - [Archivos de interfaz y lógica principal](#archivos-de-interfaz-y-lógica-principal)
+  - [Archivos de lógica de generación de exámenes](#archivos-de-lógica-de-generación-de-exámenes)
+  - [Archivos de entorno Python vía Pyodide](#archivos-de-entorno-python-vía-pyodide)
+  - [Archivos de entrada/salida](#archivos-de-entradasalida)
+    - [Licencia](#licencia)
+    - [Autores](#autores)
+- [Instrucciones de uso](#instrucciones-de-uso)
+    - [Ejemplo de exámen de entrada](#ejemplo-de-exámen-de-entrada)
+    - [Explicación rápida](#explicación-rápida)
+    - [Explicación detallada](#explicación-detallada)
+    - [Código](#código)
+
+
+---
+
+ INSTRUCCIONES DE USO - GENERADOR DE EXÁMENES
 
 Este proyecto necesita un servidor local para funcionar correctamente. Si abres el archivo index.html directamente (doble clic), algunos navegadores bloquearán la carga de módulos esenciales como Pyodide.
 
-📦 CONTENIDO NECESARIO:
+ CONTENIDO NECESARIO:
 Asegúrate de que todos estos archivos estén en la misma carpeta:
 - index.html
 - pyodide.js
@@ -36,9 +60,9 @@ Asegúrate de que todos estos archivos estén en la misma carpeta:
 - moodle.py
 - examen.txt (y cualquier archivo de preguntas)
 
-🚀 PASOS PARA USAR LA APLICACIÓN
+ PASOS PARA USAR LA APLICACIÓN
 
-⚠️ NOTA IMPORTANTE SOBRE PERMISOS
+ NOTA IMPORTANTE SOBRE PERMISOS
 
 Al hacer doble clic sobre el archivo `Iniciar_Servidor_Examenes.bat`, es posible que Windows muestre advertencias de seguridad como:
 
@@ -47,13 +71,12 @@ Al hacer doble clic sobre el archivo `Iniciar_Servidor_Examenes.bat`, es posible
 
 Esto es normal porque el archivo `.bat` intenta ejecutar un servidor local en tu propio equipo.
 
-✅ Qué debes hacer:
+ Qué debes hacer:
 - Asegúrate de que el archivo proviene de una fuente confiable (este proyecto).
 - Haz clic en “Sí” o “Permitir” para continuar.
 - Si ves advertencias de tu antivirus, puedes marcar el archivo como seguro o confiar temporalmente.
 
 El script **no instala nada** ni accede a internet, simplemente ejecuta `python -m http.server` en la carpeta actual y abre el navegador.
-
 
 
 1. **Requisitos previos**
@@ -66,23 +89,23 @@ El script **no instala nada** ni accede a internet, simplemente ejecuta `python 
    - El navegador se abrirá automáticamente en: http://localhost:8000
    - Allí podrás usar el Generador de Exámenes sin errores.
 
-❗IMPORTANTE:
+IMPORTANTE:
 - No abras `index.html` directamente desde el explorador de archivos (file:///...), ya que los navegadores bloquean módulos ES6 desde rutas locales.
 - Si ves errores relacionados con `pyodide` o `import`, asegúrate de estar usando el servidor local.
 
-📧 Contacto:
+ Contacto:
 Para dudas, contactar con el desarrollador del proyecto.
 
 
 ---
 
-## 🔧 Requisitos técnicos para ejecutar correctamente
+##  Requisitos técnicos para ejecutar correctamente
 
 Algunos navegadores (especialmente Chrome) **bloquean la ejecución de módulos locales desde archivos `file:///`**, lo que puede impedir que el proyecto funcione correctamente si se abre con doble clic.
 
 Para garantizar el funcionamiento completo:
 
-### ✅ Opción recomendada: Usar un servidor local
+###  Opción recomendada: Usar un servidor local
 
 1. Asegúrate de tener Python instalado.
 2. Usa el archivo `Iniciar_Servidor_Examenes.bat` incluido en el proyecto.
@@ -98,6 +121,66 @@ python -m http.server 8000
 y luego ir a: http://localhost:8000
 
 ---
+
+---
+
+##  Problemas comunes
+
+Esta herramienta depende de un entorno Python ejecutado en el navegador mediante Pyodide. Por ello, es importante tener en cuenta algunos errores frecuentes y cómo solucionarlos.
+
+###  Errores típicos y sus soluciones
+
+| Error | Causa probable | Solución |
+|-------|----------------|----------|
+| `pyodide is null` | Se ha abierto `index.html` directamente desde el explorador de archivos (`file:///...`) | Usa el archivo `Iniciar_Servidor_Examenes.bat` o ejecuta `python -m http.server` para abrir la aplicación desde un servidor local. |
+| `La URI de origen del módulo no está permitida` | Intento de cargar módulos ES6 desde archivos locales | Usa siempre un servidor local, nunca abras el archivo directamente con doble clic. |
+| `import` no reconocido o error al ejecutar Python | Pyodide no se ha cargado correctamente o faltan archivos | Verifica que todos los archivos indicados en la sección "Contenido necesario" están presentes en la misma carpeta. |
+| No se genera ningún archivo al exportar | El archivo `.txt` de preguntas está mal formado o codificado | Asegúrate de que esté en formato `.txt`, sin líneas en blanco al inicio o final, y guardado con codificación UTF-8. Consulta el ejemplo y la explicación detallada. |
+
+>  Consejo: abre la consola del navegador (`F12` > pestaña “Consola”) para ver mensajes de error detallados si algo falla.
+
+
+---
+
+##  Estructura del Proyecto
+
+El proyecto se compone de archivos HTML, JavaScript y Python que interactúan mediante Pyodide (una versión de Python que se ejecuta en el navegador).
+
+A continuación se describe brevemente la función de los archivos principales:
+
+###  Archivos de interfaz y lógica principal
+
+| Archivo | Descripción |
+|--------|-------------|
+| `index.html` | Interfaz principal de la aplicación. Contiene los formularios, menús y carga los scripts necesarios. |
+| `app.js` | Script JavaScript que gestiona la interacción con Pyodide, el frontend, y las acciones del usuario. |
+| `pdf.min.js` | Librería para visualizar y trabajar con PDFs en el navegador. |
+| `pico.min.css` | Estilo CSS simple y responsivo para la interfaz. |
+
+###  Archivos de lógica de generación de exámenes
+
+| Archivo | Descripción |
+|--------|-------------|
+| `papel.py` | Genera el examen en formato imprimible (texto plano o PDF). |
+| `moodle.py` | Genera un archivo XML compatible con Moodle a partir del archivo base de preguntas. |
+
+###  Archivos de entorno Python vía Pyodide
+
+| Archivo | Descripción |
+|--------|-------------|
+| `pyodide.js`, `pyodide.asm.js`, `pyodide.asm.wasm`, etc. | Archivos que permiten ejecutar Python dentro del navegador usando WebAssembly. |
+| `pyodide_py.tar`, `distutils.tar`, `packages.json` | Librerías y configuración del entorno Python para Pyodide. |
+
+###  Archivos de entrada/salida
+
+| Archivo | Descripción |
+|--------|-------------|
+| `examen.txt` | Archivo de entrada con preguntas y variables. Puede haber otros `.txt` adicionales. |
+| (salida) | Archivos PDF o XML generados al exportar el examen. |
+
+---
+
+
 
 #### Licencia
 
