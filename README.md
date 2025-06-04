@@ -20,7 +20,9 @@ La idea es que podáis escribir el examen de manera **cómoda e intuitiva**.
 - [Generador de Exámenes](#generador-de-exámenes)
 - [Tabla de Contenidos](#tabla-de-contenidos)
 - [Requisitos técnicos para ejecutar correctamente](#requisitos-técnicos-para-ejecutar-correctamente)
+- [Requisitos técnicos para ejecutar correctamente](#requisitos-técnicos-para-ejecutar-correctamente-1)
   - [Opción recomendada: Usar un servidor local](#opción-recomendada-usar-un-servidor-local)
+  - [Opción recomendada: Usar un servidor local](#opción-recomendada-usar-un-servidor-local-1)
 - [Problemas comunes](#problemas-comunes)
   - [Errores típicos y sus soluciones](#errores-típicos-y-sus-soluciones)
 - [Estructura del Proyecto](#estructura-del-proyecto)
@@ -44,6 +46,7 @@ La idea es que podáis escribir el examen de manera **cómoda e intuitiva**.
 Este proyecto necesita un servidor local para funcionar correctamente. Si abres el archivo index.html directamente (doble clic), algunos navegadores bloquearán la carga de módulos esenciales como Pyodide.
 
  CONTENIDO NECESARIO:
+ CONTENIDO NECESARIO:
 Asegúrate de que todos estos archivos estén en la misma carpeta:
 - index.html
 - pyodide.js
@@ -61,7 +64,9 @@ Asegúrate de que todos estos archivos estén en la misma carpeta:
 - examen.txt (y cualquier archivo de preguntas)
 
  PASOS PARA USAR LA APLICACIÓN
+ PASOS PARA USAR LA APLICACIÓN
 
+ NOTA IMPORTANTE SOBRE PERMISOS
  NOTA IMPORTANTE SOBRE PERMISOS
 
 Al hacer doble clic sobre el archivo `Iniciar_Servidor_Examenes.bat`, es posible que Windows muestre advertencias de seguridad como:
@@ -71,6 +76,7 @@ Al hacer doble clic sobre el archivo `Iniciar_Servidor_Examenes.bat`, es posible
 
 Esto es normal porque el archivo `.bat` intenta ejecutar un servidor local en tu propio equipo.
 
+ Qué debes hacer:
  Qué debes hacer:
 - Asegúrate de que el archivo proviene de una fuente confiable (este proyecto).
 - Haz clic en “Sí” o “Permitir” para continuar.
@@ -90,9 +96,11 @@ El script **no instala nada** ni accede a internet, simplemente ejecuta `python 
    - Allí podrás usar el Generador de Exámenes sin errores.
 
 IMPORTANTE:
+IMPORTANTE:
 - No abras `index.html` directamente desde el explorador de archivos (file:///...), ya que los navegadores bloquean módulos ES6 desde rutas locales.
 - Si ves errores relacionados con `pyodide` o `import`, asegúrate de estar usando el servidor local.
 
+ Contacto:
  Contacto:
 Para dudas, contactar con el desarrollador del proyecto.
 
@@ -100,11 +108,13 @@ Para dudas, contactar con el desarrollador del proyecto.
 ---
 
 ##  Requisitos técnicos para ejecutar correctamente
+##  Requisitos técnicos para ejecutar correctamente
 
 Algunos navegadores (especialmente Chrome) **bloquean la ejecución de módulos locales desde archivos `file:///`**, lo que puede impedir que el proyecto funcione correctamente si se abre con doble clic.
 
 Para garantizar el funcionamiento completo:
 
+###  Opción recomendada: Usar un servidor local
 ###  Opción recomendada: Usar un servidor local
 
 1. Asegúrate de tener Python instalado.
