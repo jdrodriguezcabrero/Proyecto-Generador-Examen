@@ -14,8 +14,8 @@ const SCRIPTS = {};
 const statusEl = document.getElementById('status');
 var pyodide = null;
 // Variables para imágenes asociadas a preguntas
-const imagenesSubidas = {};
-const asignacionImagenes = {};
+//const imagenesSubidas = {};
+//const asignacionImagenes = {};
 let preguntasCargadas = [];
 
 
@@ -370,6 +370,9 @@ if (btnToStep3FromStep4) {
         step3.classList.remove('hidden');
         step4Nav.classList.remove('active');
         step3Nav.classList.add('active');
+
+         // Ocultar vista previa al regresar del paso 4
+    document.getElementById("preview-container").innerHTML = "";
     });
 }
 
@@ -461,16 +464,16 @@ entradaInput.addEventListener('change', (e) => {
   const archivo = e.target.files[0];
   if (!archivo) return;
 // Capturar imágenes seleccionadas por pregunta
-preguntasCargadas.forEach((pregunta, idx) => {
+/*preguntasCargadas.forEach((pregunta, idx) => {
     const select = document.getElementById(`select-img-${idx}`);
     asignacionImagenes[pregunta] = select.value || null;
-  });
+  });*/
   
   const reader = new FileReader();
   reader.onload = function(evt) {
     const contenido = evt.target.result;
     preguntasCargadas = contenido.split('\n').filter(linea => linea.trim() !== '');
-    mostrarAsignacionImagenes();
+    //mostrarAsignacionImagenes();
   };
   reader.readAsText(archivo);
 });
@@ -478,7 +481,7 @@ preguntasCargadas.forEach((pregunta, idx) => {
 
 
 // Mostrar select de imágenes para cada pregunta
-function mostrarAsignacionImagenes() {
+/*function mostrarAsignacionImagenes() {
   const contenedor = document.getElementById('asignacion-imagenes');
   if (!contenedor) return;
   contenedor.innerHTML = '';
@@ -499,6 +502,7 @@ function mostrarAsignacionImagenes() {
     contenedor.appendChild(div);
   });
 }
+  */
 
     // Generar el examen al enviar el formulario
     var form = document.getElementById('exam-form');
@@ -1112,17 +1116,17 @@ bloques.forEach((bloque, idx) => {
     }
 
     pyodide.FS.writeFile("examen.txt", processedContent, { encoding: "utf8" });
-            // Guardar imágenes en el FS de Pyodide
+            /* Guardar imágenes en el FS de Pyodide
 for (const [nombre, archivo] of Object.entries(imagenesSubidas)) {
     const arrayBuffer = await archivo.arrayBuffer();
     const bytes = new Uint8Array(arrayBuffer);
     pyodide.FS.writeFile(nombre, bytes);
-  }
+  }*/
   
 
             // Ejecutar el script
             pyodide.globals.clear();
-            pyodide.globals.set("ASIGNACION_IMAGENES", asignacionImagenes);
+            //pyodide.globals.set("ASIGNACION_IMAGENES", asignacionImagenes);
 
             pyodide.runPython(PYTHON_GOOGLE_MOCK);
 

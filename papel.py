@@ -341,7 +341,6 @@ def formatear_pregunta_multirespuesta(pregunta, numero, config):
         'correcta': abecedario[index_correcta]
     }
 
-
 # Función para formatear una pregunta de verdadero/falso
 def formatear_pregunta_verdadero_falso(pregunta, numero, config):
     resultado = f"{numero}. {pregunta['enunciado']}\n"

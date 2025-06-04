@@ -644,7 +644,6 @@ def generar_examen_xml(preguntas_seleccionadas, data, config):
 
 # Función principal
 
-
 def main():
     # Procesar el archivo de entrada
     preguntas_clasificadas, data = clasificar_preguntas(texto_completo)

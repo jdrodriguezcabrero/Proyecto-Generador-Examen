@@ -348,6 +348,11 @@ a:hover {
     color: #000000;
 }
 
+a.enlace-instrucciones {
+            color: #f60505 !important; 
+            font-weight: bold;
+        }
+
 
     </style>
 </head>
@@ -369,7 +374,7 @@ a:hover {
                     <li><strong>📝 Generador de Exámenes Avanzado</strong></li>
                 </ul>
                 <ul>
-                    <li><a href="#instrucciones-de-uso">Instrucciones</a></li>
+                    <li><a href="#instrucciones-de-uso" class="enlace-instrucciones">Instrucciones</a></li>
                 </ul>
             </nav>
         </header>
@@ -917,7 +922,7 @@ $@@ x1+x3 @@</code></pre>
   </script>
 
 <script>
-    const imagenesAsignadas = {}; // clave: índice de pregunta, valor: archivo
+    //const imagenesAsignadas = {}; // clave: índice de pregunta, valor: archivo
   
     document.getElementById("entrada").addEventListener("change", async function () {
       const file = this.files[0];
@@ -990,10 +995,12 @@ $@@ x1+x3 @@</code></pre>
         render.push(`
           <div id="${idPregunta}" style="margin-bottom: 1em; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
             ${html}
+              <!--
             <div style="margin-top: 5px;">
-              <button onclick="document.getElementById('img-${index}').click()">📷 Asignar imagen</button>
+                <button onclick="document.getElementById('img-${index}').click()">📷 Asignar imagen</button>
               <input type="file" id="img-${index}" accept="image/*" style="display:none" onchange="asignarImagen(event, ${index})">
               <div id="img-preview-${index}" style="margin-top:5px;"></div>
+              -->
             </div>
             <button onclick="eliminarPregunta('${idPregunta}')">❌ Eliminar</button>
           </div>
@@ -1011,7 +1018,7 @@ $@@ x1+x3 @@</code></pre>
       }
     }
   
-    function asignarImagen(event, index) {
+    /*function asignarImagen(event, index) {
       const archivo = event.target.files[0];
       if (!archivo) return;
   
@@ -1023,7 +1030,7 @@ $@@ x1+x3 @@</code></pre>
         document.getElementById(`img-preview-${index}`).innerHTML = img;
       };
       reader.readAsDataURL(archivo);
-    }
+    }*/
   </script>
 
 <script>
